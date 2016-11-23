@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+	<button id="btn1" value="1">ph 1</button>
+	<button id="btn2" value="2">ph 2</button>
+	<button id="btn3" value="3">ph 3</button>
+	<button id="btn4" value="4">ph 4</button>
+	<button id="btn5" value="5">ph 5</button>
+	<button id="btn6" value="6">ph 6</button>
+	<button id="btn7" value="7">ph 7</button>
+	<button id="btn8" value="8">ph 8</button>
+	<button id="btn9" value="9">ph 9</button>
+	<button id="btn10" value="10">ph 10</button>
+	<button id="btn11" value="11">ph 11</button>
+	<button id="btn12" value="12">ph 12</button>
+	<button id="btn13" value="13">ph 13</button>
+	<button id="btn14" value="14">ph 14</button>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="jquery.min.js"></script>
+	<script>
+		var socket = io();
+
+		$("button").click(function(e){
+			var ph = $(this).val();
+			emit_ph(ph);
+		})
+
+		socket.on('update ph', function(level){
+			console.log(level);
+		})
+
+		function emit_ph(level){
+			var send = {device:id,temperature:temp,ph:level}
+			socket.emit("set ph",send);
+			}
+		}
+	</script>
+</body>
+</html>
