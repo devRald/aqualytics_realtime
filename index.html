@@ -34,9 +34,8 @@
 		})
 
 		function emit_ph(level){
-			var send = {device:id,temperature:temp,ph:level}
+			var send = {device:"2",temperature:39.15,ph:level}
 			socket.emit("set ph",send);
-			}
 		}
 	</script>
 </body>
