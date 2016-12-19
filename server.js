@@ -4,9 +4,7 @@ var querystring = require('querystring');
 var server = http.createServer(app);
 var io = require('socket.io')(server);
 
-//var ipaddress = '127.0.0.1';
-var ipaddress = '192.168.43.163';
-//var ipaddress = '192.168.0.103';
+var ipaddress = '127.0.0.1';
 var port = 8080;
 var userCount = 0;
 server.listen(port,ipaddress, function () {
@@ -15,10 +13,12 @@ server.listen(port,ipaddress, function () {
 
 io.on('connection',function(socket){
 	console.log("Device Connected");
-	socket.on('set ph',function(ph){
-		console.log(ph);
-		insertLog(ph);
-		socket.broadcast.emit("update ph", ph);
+	socket.on('set params',function(params){
+		console.log(params);
+		//insertLog(ph);
+
+		push_notification(params);
+		socket.broadcast.emit("update params", params);
 	})
 })
 
@@ -27,10 +27,29 @@ app.post('/aqualytics', function(req, res, next){
 	var temp = req.query.temperature;
 	var ph = req.query.ph;
 	var d = {device:id,temperature:temp,ph:ph};
-	console.log(d)
-	//insertLog(ph);
-	io.emit('update ph', d);
+	//console.log(d)
+	//insertLog(d);
+	var noti = 0;
+	if(ph>8.5){
+		noti++;
+	}else if(ph<3){
+		noti++;
+	}else if(ph<6){
+		noti++;
+	}
+	io.emit('alert',{device_id:id,notifications:noti});
+	io.emit('update params', d);
 	res.send({"success":"posted"});
+})
+
+app.post('/aqualytics/notification', function(req, res, next){
+	var id = req.query.device;
+	var categ = req.query.category;
+	var title = req.query.title;
+	var reading = req.query.reading;
+	var d = {device:id,category:categ,title:title,reading:reading};
+
+	
 })
 
 var insertLog = function(q){
@@ -56,4 +75,24 @@ var insertLog = function(q){
   });
   httpreq.write(data);
   httpreq.end();
+}
+
+var insert_notification = function(id,category,title,desc){
+		console.log("insert")
+}
+
+var push_notification = function(data){
+	if(data.ph > 8.5){
+		insert_notification(data.device,"ph","High PH Level",`PH Level at ${data.ph}. There is a possible grow of algae.`)
+		io.emit("alert",{id:data.device,type:"danger",title:"High PH Level",short:"Possible grow of algae"});	
+	}
+
+	if(data.ph <= 3){
+		insert_notification(data.device,"ph","Very Low PH Level",`PH Level at ${data.ph}. Aquatic Resources are at risks.`)
+		io.emit("alert",{id:data.device,type:"danger",title:"Very Low PH Level",short:"Aquatic Resources are at risks."});
+	}else if(data.ph <= 6){
+		insert_notification(data.device,"ph","Low PH Level",`PH Level at ${data.ph}. Watch out about the PH Level.`)
+		io.emit("alert",{id:data.device,type:"warning",title:"Low PH Level",short:"Warning, Watch out.."});
+
+	}
 }

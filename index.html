@@ -5,6 +5,8 @@
 	<title>Document</title>
 </head>
 <body>
+	<input type="number" id="devnum" val="1">
+	<br><br>
 	<button id="btn1" value="1">ph 1</button>
 	<button id="btn2" value="2">ph 2</button>
 	<button id="btn3" value="3">ph 3</button>
@@ -19,23 +21,38 @@
 	<button id="btn12" value="12">ph 12</button>
 	<button id="btn13" value="13">ph 13</button>
 	<button id="btn14" value="14">ph 14</button>
+	<br>
+	<br>
+	<br>
+	<input type="range" id="tmp" min="0" max="60">
+	<input type="range" id="turbid" min="1" max="50">
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="jquery.min.js"></script>
 	<script>
 		var socket = io();
-
+		var turb = 0;
+		var temp = 0;
 		$("button").click(function(e){
 			var ph = $(this).val();
-			emit_ph(ph);
+			var id = $("#devnum").val();
+			emit_ph(id,ph,temp,turb);
 		})
 
 		socket.on('update ph', function(level){
 			console.log(level);
 		})
 
-		function emit_ph(level){
-			var send = {device:"2",temperature:39.15,ph:level}
-			socket.emit("set ph",send);
+		$("#tmp").change(function(){
+			temp = $(this).val()
+		})
+
+		$("#turbid").change(function(){
+			turb = $(this).val()
+		})
+
+		function emit_ph(id,ph,temp,turb){
+			var send = {device:id,temperature:temp,ph:ph,turbidity:turb}
+			socket.emit("set params",send);
 		}
 	</script>
 </body>
